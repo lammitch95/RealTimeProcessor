@@ -1,0 +1,10 @@
+#ifndef SENSORSIMULATOR_H
+#define SENSORSIMULATOR_H
+
+class SensorSimulator
+{
+public:
+    SensorSimulator();
+};
+
+#endif // SENSORSIMULATOR_H

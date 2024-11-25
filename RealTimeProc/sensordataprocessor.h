@@ -1,0 +1,51 @@
+#ifndef SENSORDATAPROCESSOR_H
+#define SENSORDATAPROCESSOR_H
+
+#include <QObject>
+#include <QThread>
+#include <QList>
+#include <atomic>
+#include <sensorsimulator.h>
+#include <datapoint.h>
+
+using namespace std;
+
+
+class SensorDataProcessor: public QObject{
+
+    Q_OBJECT
+
+public:
+    explicit SensorDataProcessor(QObject *parent = nullptr);
+    ~SensorDataProcessor();
+
+    void startProcessing(int numDataPoints);
+    void stopProcessing();
+    void resetProcess();
+
+    void generateSensors(int numDataPoints);
+    void processData();
+    void updateStats(double value, double &min, double &max, double &sum, int &count);
+
+signals:
+    void progressUpdated(const QString &statusMessage,int current, int total);
+    void statusChanged(const QString &status);
+    void statsUpdated(const QString &sensorType, double dataAverage, double dataMin, double dataMax);
+    void updateCharts(const QString &status, const QList<DataPoint> dataPoints);
+
+private:
+
+    int totalDataPoints = 0;
+    vector<unique_ptr<SensorSimulator>> rawData;
+    atomic<bool> isProcessing = false;
+    atomic<int> processCounter = 0;
+    mutex dataMutex;
+
+    double totalTemp = 0.0, totalPressure = 0.0, totalVoltage = 0.0;
+    double minTemp = 1e9, minPressure = 1e9, minVoltage = 1e9;
+    double maxTemp = -1e9, maxPressure = -1e9, maxVoltage = -1e9;
+    int tempCount = 0, pressureCount = 0, voltageCount = 0;
+
+};
+
+#endif // SENSORDATAPROCESSOR_H

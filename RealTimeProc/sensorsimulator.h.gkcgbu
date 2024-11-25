@@ -1,0 +1,33 @@
+#ifndef SENSORSIMULATOR_H
+#define SENSORSIMULATOR_H
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class SensorSimulator{
+
+    public:
+        SensorSimulator(string type, string data): sensorType(type),sensorData(data){};
+        ~SensorSimulator();
+
+        int getSensorID(){return sensorID;}
+        string getSensorType(){return sensorType;}
+        string getSensorData(){return sensorData;}
+
+        virtual string generatedData() = 0;
+
+    private:
+        int sensorID;
+        string sensorType;
+        string sensorData;
+        static int sensorIDCounter;
+
+};
+
+int SensorSimulator::sensorIDCounter = 0;
+
+
+
+#endif // SENSORSIMULATOR_H
