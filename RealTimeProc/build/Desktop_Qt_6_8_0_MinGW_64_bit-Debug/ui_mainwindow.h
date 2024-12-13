@@ -16,6 +16,7 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableWidget>
@@ -31,7 +32,7 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QFrame *frame;
     QVBoxLayout *verticalLayout;
-    QFrame *frame_3;
+    QFrame *buttonsPanel;
     QVBoxLayout *verticalLayout_2;
     QPushButton *btnStart;
     QPushButton *btnReset;
@@ -42,8 +43,11 @@ public:
     QFrame *frame_4;
     QVBoxLayout *verticalLayout_3;
     QLabel *LBLProcess;
+    QLabel *LBLProgressPercent;
     QLabel *LblStatus;
     QFrame *frame_6;
+    QVBoxLayout *verticalLayout_5;
+    QListView *listView;
     QFrame *frame_5;
     QVBoxLayout *verticalLayout_4;
     QTableWidget *SensorTable;
@@ -80,19 +84,16 @@ public:
         frame->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout = new QVBoxLayout(frame);
         verticalLayout->setObjectName("verticalLayout");
-        frame_3 = new QFrame(frame);
-        frame_3->setObjectName("frame_3");
-        frame_3->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_3->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_2 = new QVBoxLayout(frame_3);
+        buttonsPanel = new QFrame(frame);
+        buttonsPanel->setObjectName("buttonsPanel");
+        buttonsPanel->setFrameShape(QFrame::Shape::StyledPanel);
+        buttonsPanel->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_2 = new QVBoxLayout(buttonsPanel);
         verticalLayout_2->setObjectName("verticalLayout_2");
-        btnStart = new QPushButton(frame_3);
+        btnStart = new QPushButton(buttonsPanel);
         btnStart->setObjectName("btnStart");
-        QSizePolicy sizePolicy1(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Minimum);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(btnStart->sizePolicy().hasHeightForWidth());
-        btnStart->setSizePolicy(sizePolicy1);
+        sizePolicy.setHeightForWidth(btnStart->sizePolicy().hasHeightForWidth());
+        btnStart->setSizePolicy(sizePolicy);
         QFont font;
         font.setBold(true);
         btnStart->setFont(font);
@@ -104,10 +105,10 @@ public:
 
         verticalLayout_2->addWidget(btnStart);
 
-        btnReset = new QPushButton(frame_3);
+        btnReset = new QPushButton(buttonsPanel);
         btnReset->setObjectName("btnReset");
-        sizePolicy1.setHeightForWidth(btnReset->sizePolicy().hasHeightForWidth());
-        btnReset->setSizePolicy(sizePolicy1);
+        sizePolicy.setHeightForWidth(btnReset->sizePolicy().hasHeightForWidth());
+        btnReset->setSizePolicy(sizePolicy);
         btnReset->setFont(font);
         btnReset->setStyleSheet(QString::fromUtf8("background-color:  rgb(0, 181, 222);\n"
 "color: white;\n"
@@ -117,7 +118,7 @@ public:
         verticalLayout_2->addWidget(btnReset);
 
 
-        verticalLayout->addWidget(frame_3);
+        verticalLayout->addWidget(buttonsPanel);
 
         frame_2 = new QFrame(frame);
         frame_2->setObjectName("frame_2");
@@ -160,6 +161,13 @@ public:
 
         verticalLayout_3->addWidget(LBLProcess);
 
+        LBLProgressPercent = new QLabel(frame_4);
+        LBLProgressPercent->setObjectName("LBLProgressPercent");
+        LBLProgressPercent->setFont(font);
+        LBLProgressPercent->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+
+        verticalLayout_3->addWidget(LBLProgressPercent);
+
         LblStatus = new QLabel(frame_4);
         LblStatus->setObjectName("LblStatus");
         LblStatus->setFont(font);
@@ -174,10 +182,20 @@ public:
         frame_6->setObjectName("frame_6");
         frame_6->setFrameShape(QFrame::Shape::StyledPanel);
         frame_6->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_5 = new QVBoxLayout(frame_6);
+        verticalLayout_5->setObjectName("verticalLayout_5");
+        listView = new QListView(frame_6);
+        listView->setObjectName("listView");
+
+        verticalLayout_5->addWidget(listView);
+
 
         verticalLayout->addWidget(frame_6);
 
-        verticalLayout->setStretch(3, 1);
+        verticalLayout->setStretch(0, 1);
+        verticalLayout->setStretch(1, 1);
+        verticalLayout->setStretch(2, 1);
+        verticalLayout->setStretch(3, 5);
 
         horizontalLayout_2->addWidget(frame);
 
@@ -271,6 +289,8 @@ public:
 
         horizontalLayout_2->addWidget(frame_5);
 
+        horizontalLayout_2->setStretch(0, 1);
+        horizontalLayout_2->setStretch(1, 2);
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
@@ -286,6 +306,7 @@ public:
         sensorNumLbl->setText(QCoreApplication::translate("MainWindow", "Sensor Amount: ", nullptr));
         SensorAmountTxt->setText(QString());
         LBLProcess->setText(QCoreApplication::translate("MainWindow", "NA: (0/0)", nullptr));
+        LBLProgressPercent->setText(QCoreApplication::translate("MainWindow", "Completion... 0%", nullptr));
         LblStatus->setText(QCoreApplication::translate("MainWindow", "Status: Active", nullptr));
         QTableWidgetItem *___qtablewidgetitem = SensorTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QCoreApplication::translate("MainWindow", "Avg", nullptr));

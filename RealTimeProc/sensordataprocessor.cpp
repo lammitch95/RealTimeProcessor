@@ -70,12 +70,13 @@ void SensorDataProcessor::updateStats(double value, double &min, double &max, do
 void SensorDataProcessor::processData(){
     if(rawData.empty())return;
 
+    int rawDataSize = rawData.size();
     // Divide data into chunks based on number of available CPU cores
-    int chunkSize = rawData.size() / std::thread::hardware_concurrency();
+    int chunkSize = rawDataSize / std::thread::hardware_concurrency();
     std::vector<std::thread> threads;
     processCounter = 0;
 
-    const int updateInterval = 10000;
+    const int updateInterval = std::max(1000, rawDataSize / 100);
 
     emit statusChanged("(Multi Thread) Processing Data Objects...");
 
@@ -86,7 +87,7 @@ void SensorDataProcessor::processData(){
         int startIndex = i * chunkSize;
         int endIndex = (i == std::thread::hardware_concurrency() - 1) ? rawData.size() : (i + 1) * chunkSize;
 
-        threads.push_back(std::thread([this,startIndex,endIndex, &processTimer](){
+        threads.push_back(std::thread([this,startIndex,endIndex, &processTimer, updateInterval](){
 
             int localProgress = 0;
             QList<DataPoint> localDataList;
@@ -101,23 +102,19 @@ void SensorDataProcessor::processData(){
                  double elapsedTime = processTimer.elapsed() / 1000.0;
 
                  if (sensorType == "Temperature") {
-
                      updateStats(sensorData, minTemp, maxTemp, totalTemp, tempCount);
-
                  } else if (sensorType == "Pressure") {
-
                      updateStats(sensorData, minPressure, maxPressure, totalPressure, pressureCount);
-
                  } else if (sensorType == "Voltage") {
-
                      updateStats(sensorData, minVoltage, maxVoltage, totalVoltage, voltageCount);
                  }
 
-                 localDataList.append(DataPoint(sensorID, elapsedTime,sensorType));
+                localDataList.append(DataPoint(sensorID, elapsedTime,sensorType));
 
                 localProgress++;
 
-                if (localProgress % updateInterval == 0 || j == endIndex - 1) {
+                bool isFinalUpdate = (j == endIndex - 1);
+                if (localProgress % updateInterval == 0 || isFinalUpdate) {
                     
                     processCounter += localProgress;
 

@@ -106,6 +106,8 @@ void MainWindow::updateCharts(const QString &status, const QList<DataPoint> &dat
         mainChartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         ui->chartHolder->addWidget(mainChartView);
 
+        ui->chartHolder->layout()->update();
+
         currentSeries = new QScatterSeries();
         mainChart->addSeries(currentSeries);
 
@@ -166,19 +168,25 @@ void MainWindow::refreshChart(const QList<DataPoint> &data, const QString &title
         currentSeries->clear();
     }
 
-    //QList<DataPoint> sampledData = downsampleData(data, 10000); // Max 10,000 points
-
+    QList<DataPoint> sampledData = downsampleData(data, 1000);
 
     QScatterSeries *scatterSeries = new QScatterSeries();
     scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-    scatterSeries->setMarkerSize(8.0);
+    scatterSeries->setMarkerSize(10.0);
 
     double minX = std::numeric_limits<double>::max();
     double maxX = std::numeric_limits<double>::lowest();
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    for (const auto &point : data) {
+    //qDebug() << "Data size:" << data.size();
+
+    if (data.isEmpty()) {
+        qDebug() << "No data to display!";
+        return;
+    }
+
+    for (const auto &point : sampledData) {
         scatterSeries->append(point.getXData(), point.getYData());
         minX = std::min(minX, point.getXData());
         maxX = std::max(maxX, point.getXData());
@@ -201,6 +209,8 @@ void MainWindow::refreshChart(const QList<DataPoint> &data, const QString &title
     }
 
     currentSeries = scatterSeries;
+
+    //ui->chartHolder->layout()->update();
 
 }
 
