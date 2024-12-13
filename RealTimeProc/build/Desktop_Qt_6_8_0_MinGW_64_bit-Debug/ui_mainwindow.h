@@ -43,11 +43,10 @@ public:
     QFrame *frame_4;
     QVBoxLayout *verticalLayout_3;
     QLabel *LBLProcess;
-    QLabel *LBLProgressPercent;
     QLabel *LblStatus;
     QFrame *frame_6;
     QVBoxLayout *verticalLayout_5;
-    QListView *listView;
+    QListView *SensorsView;
     QFrame *frame_5;
     QVBoxLayout *verticalLayout_4;
     QTableWidget *SensorTable;
@@ -161,13 +160,6 @@ public:
 
         verticalLayout_3->addWidget(LBLProcess);
 
-        LBLProgressPercent = new QLabel(frame_4);
-        LBLProgressPercent->setObjectName("LBLProgressPercent");
-        LBLProgressPercent->setFont(font);
-        LBLProgressPercent->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
-
-        verticalLayout_3->addWidget(LBLProgressPercent);
-
         LblStatus = new QLabel(frame_4);
         LblStatus->setObjectName("LblStatus");
         LblStatus->setFont(font);
@@ -184,10 +176,10 @@ public:
         frame_6->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout_5 = new QVBoxLayout(frame_6);
         verticalLayout_5->setObjectName("verticalLayout_5");
-        listView = new QListView(frame_6);
-        listView->setObjectName("listView");
+        SensorsView = new QListView(frame_6);
+        SensorsView->setObjectName("SensorsView");
 
-        verticalLayout_5->addWidget(listView);
+        verticalLayout_5->addWidget(SensorsView);
 
 
         verticalLayout->addWidget(frame_6);
@@ -306,7 +298,6 @@ public:
         sensorNumLbl->setText(QCoreApplication::translate("MainWindow", "Sensor Amount: ", nullptr));
         SensorAmountTxt->setText(QString());
         LBLProcess->setText(QCoreApplication::translate("MainWindow", "NA: (0/0)", nullptr));
-        LBLProgressPercent->setText(QCoreApplication::translate("MainWindow", "Completion... 0%", nullptr));
         LblStatus->setText(QCoreApplication::translate("MainWindow", "Status: Active", nullptr));
         QTableWidgetItem *___qtablewidgetitem = SensorTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QCoreApplication::translate("MainWindow", "Avg", nullptr));

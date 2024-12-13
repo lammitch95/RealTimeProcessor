@@ -177,7 +177,7 @@ padding: 10px;</string>
          <property name="frameShadow">
           <enum>QFrame::Shadow::Raised</enum>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0">
+         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
           <item>
            <widget class="QLabel" name="LBLProcess">
             <property name="font">
@@ -187,21 +187,6 @@ padding: 10px;</string>
             </property>
             <property name="text">
              <string>NA: (0/0)</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="LBLProgressPercent">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Completion... 0%</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -236,7 +221,7 @@ padding: 10px;</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QListView" name="listView"/>
+           <widget class="QListView" name="SensorsView"/>
           </item>
          </layout>
         </widget>
