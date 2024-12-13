@@ -168,7 +168,7 @@ void MainWindow::refreshChart(const QList<DataPoint> &data, const QString &title
         currentSeries->clear();
     }
 
-    QList<DataPoint> sampledData = downsampleData(data, 1000);
+    QList<DataPoint> sampledData = downsampleData(data, 10000);
 
     QScatterSeries *scatterSeries = new QScatterSeries();
     scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeCircle);
