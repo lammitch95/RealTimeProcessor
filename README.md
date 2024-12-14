@@ -7,7 +7,7 @@ and then provides statistical analysis for each sensor type, such as average, mi
 it visualizes the processing times of each object using scatter charts, displaying real-time performance metrics.
 
 ### Multithreading Concept and Design
-
+* Utilizes a thread pool to manage threads efficiently, reusing threads to reduce overhead and improve performance.
 * Split the data  into chunks based on the number of available CPU cores ensuring even distribution.
 * Launch threads each responsible for processing a chunk of data. Use lambda functions to encapsulate the work logic for each thread.
 * Use atomic counters to safely update shared variables.
