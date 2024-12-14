@@ -6,7 +6,7 @@ The application generates sensor objects for various types (Temperature, Pressur
 and then provides statistical analysis for each sensor type, such as average, minimum, and maximum values. Additionally, 
 it visualizes the processing times of each object using scatter charts, displaying real-time performance metrics.
 
-###Multithreading Concept and Design
+### Multithreading Concept and Design
 
 * Split the data  into chunks based on the number of available CPU cores ensuring even distribution.
 * Launch threads each responsible for processing a chunk of data. Use lambda functions to encapsulate the work logic for each thread.
