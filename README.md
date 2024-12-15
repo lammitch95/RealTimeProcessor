@@ -17,6 +17,12 @@ it visualizes the processing times of each object using scatter charts, displayi
 ### Demo
 ![DemoGifRealTimeProc](https://github.com/user-attachments/assets/8753ac13-f929-4752-9b39-ed3cc87dc68d) 
 
+#### Single-Threaded vs. Multithreaded Processing
+##### The following GIF demonstrates the workflow of the application, including:
+1. Single-threaded object generation: The creation of 700k+ sensor objects.
+2. Multithreaded data processing: The calculation of statistical data and visualization of processing times.
+Notice the significant reduction in processing time when switching to multithreading for data processing tasks
+
 ### Key Features
 
 * Utilizes Qt's threading capabilities to process large datasets in parallel, reducing processing time.
