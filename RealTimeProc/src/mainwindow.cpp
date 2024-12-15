@@ -17,10 +17,16 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
     connect(processor, &SensorDataProcessor::statusChanged, this, &MainWindow::updateStatus, Qt::QueuedConnection);
     connect(processor, &SensorDataProcessor::statsUpdated, this, &MainWindow::statsUpdated, Qt::QueuedConnection);
     connect(processor, &SensorDataProcessor::updateCharts, this, &MainWindow::updateCharts, Qt::QueuedConnection);
+    connect(processor, &SensorDataProcessor::updateProcessTime, this, &MainWindow::updateProcessTime, Qt::QueuedConnection);
 
 
     ui->LBLProcess->setText(QString("NA...(0/0)"));
     ui->LblStatus->setText(QString("Status: None"));
+    ui->SensorAmountTxt->setPlaceholderText("Allowed Amount 1 - 99,999,999");
+
+    ui->LblSingleThread->setText(QString("(Single Thread) Generate Objects Time: 0.00"));
+    ui->LblMultiThread->setText(QString("(Multithreading) Processed Objects Time: 0.00"));
+
 
     temperatureDataPoints = QList<DataPoint>();
     pressureDataPoints = QList<DataPoint>();
@@ -31,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
+    delete processor;
     delete ui;
 }
 
@@ -39,14 +46,14 @@ void MainWindow::on_btnStart_clicked()
     bool validNum;
     int numPoints = ui->SensorAmountTxt->text().toInt(&validNum);
 
-    if(validNum and numPoints > 0){
+    if(validNum && numPoints > 0 && numPoints <= 99999999){
 
         processor->startProcessing(numPoints);
 
         ui->btnStart->setEnabled(false);
         ui->btnReset->setEnabled(true);
     }else{
-         QMessageBox::warning(this, "Invalid Input", "Please enter a valid number of data points greater than 0.");
+         QMessageBox::warning(this, "Invalid Input", "Number of data points must be in the range 1 - 99,999,999.");
     }
 
 }
@@ -60,6 +67,10 @@ void MainWindow::on_btnReset_clicked()
     ui->btnStart->setEnabled(true);
     ui->btnReset->setEnabled(false);
 
+    ui->LblSingleThread->setText(QString("(Single Thread) Generate Objects Time: 0.00"));
+    ui->LblMultiThread->setText(QString("(Multithreading) Processed Objects Time: 0.00"));
+
+
 }
 
 
@@ -69,6 +80,16 @@ void MainWindow::updateProgress(const QString &progresMess, int current, int tot
 
 void MainWindow::updateStatus(const QString &status){
     ui->LblStatus->setText(QString("Status: %1").arg(status));
+}
+
+void MainWindow::updateProcessTime(const double &timeOne, const double &timeTwo){
+
+    QString formatTimeOne = timeOne > 1000.0 ? QString("%1s").arg(timeOne/1000.0) :  QString("%1ms").arg(timeOne);
+    ui->LblSingleThread->setText(QString("(Single Thread) Generate Objects Time: %1").arg(formatTimeOne));
+
+    QString formatTimeTwo = timeTwo > 1000.0 ? QString("%1s").arg(timeTwo/1000.0) :  QString("%1ms").arg(timeTwo);
+    ui->LblMultiThread->setText(QString("(Multithreading) Processed Objects Time: %1").arg(formatTimeTwo));
+
 }
 
 void MainWindow::statsUpdated(const QString &sensorType, double dataAverage, double dataMin, double dataMax){
@@ -118,7 +139,7 @@ void MainWindow::updateCharts(const QString &status, const QList<DataPoint> &dat
         currentSeries->attachAxis(axisX);
 
         QValueAxis *axisY = new QValueAxis();
-        axisY->setTitleText("Processing Tims (s)");
+        axisY->setTitleText("Processing Time (milliseconds)");
         axisY->setRange(0, 10);
         mainChart->addAxis(axisY, Qt::AlignLeft);
         currentSeries->attachAxis(axisY);
@@ -126,8 +147,7 @@ void MainWindow::updateCharts(const QString &status, const QList<DataPoint> &dat
     }else if(status == "update"){
 
       //qDebug() << "local data list:" << dataPoints.size();
-
-        for (const auto &point : dataPoints) {
+      for (const auto &point : dataPoints) {
             QString type = point.getSensorType();
             if (type == "Temperature") {
                 temperatureDataPoints.append(point);
@@ -136,7 +156,9 @@ void MainWindow::updateCharts(const QString &status, const QList<DataPoint> &dat
             } else if (type == "Voltage") {
                 voltageDataPoints.append(point);
             }
-        }
+      }
+
+    }else if(status == "finish"){
 
         // Update the currently displayed chart
         if (currentSensorType == "Temperature") {
@@ -168,7 +190,7 @@ void MainWindow::refreshChart(const QList<DataPoint> &data, const QString &title
         currentSeries->clear();
     }
 
-    QList<DataPoint> sampledData = downsampleData(data, 1000);
+    QList<DataPoint> sampledData = downsampleData(data, 2500);
 
     QScatterSeries *scatterSeries = new QScatterSeries();
     scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeCircle);
@@ -187,6 +209,7 @@ void MainWindow::refreshChart(const QList<DataPoint> &data, const QString &title
     }
 
     for (const auto &point : sampledData) {
+        //qDebug() << "Checking y values: " << point.getYData();
         scatterSeries->append(point.getXData(), point.getYData());
         minX = std::min(minX, point.getXData());
         maxX = std::max(maxX, point.getXData());
@@ -195,7 +218,7 @@ void MainWindow::refreshChart(const QList<DataPoint> &data, const QString &title
     }
 
     mainChart->addSeries(scatterSeries);
-    mainChart->setTitle(title + " Data Processing Analysis");
+    mainChart->setTitle(title + " Data Processing Analysis(Data Points Show up to 2500)");
 
     auto axisY = dynamic_cast<QValueAxis *>(mainChart->axes(Qt::Vertical).first());
     if (axisY) {

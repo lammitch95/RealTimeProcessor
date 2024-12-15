@@ -20,7 +20,8 @@ SOURCES += \
     src/temperaturesensor.cpp \
     src/databasehandle.cpp \
     src/sensorsimulator.cpp \
-    src/voltagesensor.cpp
+    src/voltagesensor.cpp \
+    src/threadpool.cpp \
 
 HEADERS += \
     include/databasehandle.h \
@@ -30,7 +31,8 @@ HEADERS += \
     include/sensordataprocessor.h \
     include/sensorsimulator.h \
     include/temperaturesensor.h \
-    include/voltagesensor.h
+    include/voltagesensor.h \
+    include/threadpool.h \
 
 FORMS += \
     mainwindow.ui

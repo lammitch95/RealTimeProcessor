@@ -36,6 +36,7 @@ private slots:
     void updateStatus(const QString &status);
     void statsUpdated(const QString &sensorType, double dataAverage, double dataMin, double dataMax);
     void updateCharts(const QString &status, const QList<DataPoint> &dataPoints);
+    void updateProcessTime(const double &timeOne, const double &timeTwo);
 
 
     void on_BtnTempChart_clicked();

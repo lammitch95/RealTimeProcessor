@@ -6,7 +6,7 @@
 #include <cmath>
 #include <QRandomGenerator>
 #include <QDebug>
-#include <QElapsedTimer>
+#include <QDateTime>
 
 SensorDataProcessor::SensorDataProcessor(QObject *parent): QObject(parent), isProcessing(false) {}
 SensorDataProcessor::~SensorDataProcessor(){}
@@ -20,15 +20,24 @@ void SensorDataProcessor::startProcessing(int numDataPoints){
 
     isProcessing = true;
     processCounter = 0;
+    activeTask = 0;
 
     emit statusChanged("Starting data processing...");
 
-    std::thread([this, numDataPoints]() {
+    pool = new ThreadPool(std::thread::hardware_concurrency());
+
+ /*
+     std::thread([this, numDataPoints]() {
         generateSensors(numDataPoints);
         processData();
-        isProcessing = false;
-        emit statusChanged("Processing complete.");
     }).detach();
+*/
+
+    pool->addTask([this, numDataPoints]() {
+        generateSensors(numDataPoints);
+         processData();
+    });
+
 }
 
 void SensorDataProcessor::stopProcessing(){
@@ -42,6 +51,11 @@ void SensorDataProcessor::stopProcessing(){
 }
 
 void SensorDataProcessor::resetProcess(){
+
+    startGenObjTime = 0.0;
+    startProcObjTime = 0.0;
+    generateObjectTime = 0.0;
+    processObjectTime = 0.0;
 
     stopProcessing();
     rawData.clear();
@@ -67,80 +81,119 @@ void SensorDataProcessor::updateStats(double value, double &min, double &max, do
     ++count;
 }
 
+void SensorDataProcessor::processDataChunk(int startIndex, int endIndex,  qint64 startTime, int updateInterval){
+
+    int localProgress = 0;
+    QList<DataPoint> localDataList;
+
+    for(int j = startIndex; j < endIndex; ++j){
+        if (j < 0 || j >= rawData.size()) {
+            qWarning() << "Index out of bounds for rawData:" << j;
+            continue;
+        }
+
+        int sensorID = rawData[j]->getSensorID();
+        double sensorData = rawData[j]->getSensorData();
+        QString sensorType = rawData[j]->getSensorType();
+
+        qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+        double elapsedTime = currentTime - startTime;
+
+        //qDebug() << "Elapsed process time: " << elapsedTime;
+
+        if (sensorType == "Temperature") {
+             updateStats(sensorData, minTemp, maxTemp, totalTemp, tempCount);
+        } else if (sensorType == "Pressure") {
+             updateStats(sensorData, minPressure, maxPressure, totalPressure, pressureCount);
+        } else if (sensorType == "Voltage") {
+            updateStats(sensorData, minVoltage, maxVoltage, totalVoltage, voltageCount);
+        }
+
+        localDataList.append(DataPoint(sensorID, elapsedTime,sensorType));
+
+        localProgress++;
+
+        bool isFinalUpdate = (j == endIndex - 1);
+        if (localProgress % updateInterval == 0 || isFinalUpdate) {
+
+            processCounter += localProgress;
+
+            emit progressUpdated(QString("Processing Data Objects..."),processCounter, rawData.size());
+            emit statsUpdated("Temperature", totalTemp/tempCount, minTemp, maxTemp);
+            emit statsUpdated("Pressure", totalPressure/pressureCount, minPressure, maxPressure);
+            emit statsUpdated("Voltage", totalVoltage/voltageCount, minVoltage, maxVoltage);
+
+            emit updateCharts("update", localDataList);
+            localDataList.clear();
+
+            localProgress = 0;
+        }
+    }
+
+}
+
 void SensorDataProcessor::processData(){
     if(rawData.empty())return;
 
     int rawDataSize = rawData.size();
-    // Divide data into chunks based on number of available CPU cores
     int chunkSize = rawDataSize / std::thread::hardware_concurrency();
-    std::vector<std::thread> threads;
+
     processCounter = 0;
 
     const int updateInterval = std::max(1000, rawDataSize / 100);
 
     emit statusChanged("(Multi Thread) Processing Data Objects...");
 
-    QElapsedTimer processTimer;
-    processTimer.start();
+    qint64 startTime = QDateTime::currentMSecsSinceEpoch();
+    startProcObjTime = startTime;
+
+    activeTask = std::thread::hardware_concurrency();
+    qDebug() << "Starting tasks remaining:" << activeTask;
 
     for(size_t i = 0; i < std::thread::hardware_concurrency(); ++i){
         int startIndex = i * chunkSize;
         int endIndex = (i == std::thread::hardware_concurrency() - 1) ? rawData.size() : (i + 1) * chunkSize;
 
-        threads.push_back(std::thread([this,startIndex,endIndex, &processTimer, updateInterval](){
+        pool->addTask([this,startIndex,endIndex,startTime, updateInterval]{
+            try {
+                processDataChunk(startIndex, endIndex, startTime, updateInterval);
 
-            int localProgress = 0;
-            QList<DataPoint> localDataList;
-
-            for(int j = startIndex; j < endIndex; ++j){
-                 if (!isProcessing) return;
-
-                 int sensorID = rawData[j]->getSensorID();
-                 double sensorData = rawData[j]->getSensorData();
-                 QString sensorType = rawData[j]->getSensorType();
-
-                 double elapsedTime = processTimer.elapsed() / 1000.0;
-
-                 if (sensorType == "Temperature") {
-                     updateStats(sensorData, minTemp, maxTemp, totalTemp, tempCount);
-                 } else if (sensorType == "Pressure") {
-                     updateStats(sensorData, minPressure, maxPressure, totalPressure, pressureCount);
-                 } else if (sensorType == "Voltage") {
-                     updateStats(sensorData, minVoltage, maxVoltage, totalVoltage, voltageCount);
-                 }
-
-                localDataList.append(DataPoint(sensorID, elapsedTime,sensorType));
-
-                localProgress++;
-
-                bool isFinalUpdate = (j == endIndex - 1);
-                if (localProgress % updateInterval == 0 || isFinalUpdate) {
-                    
-                    processCounter += localProgress;
-
-                    emit progressUpdated(QString("Processing Data Objects..."),processCounter, rawData.size());
-                    emit statsUpdated("Temperature", totalTemp/tempCount, minTemp, maxTemp);
-                    emit statsUpdated("Pressure", totalPressure/pressureCount, minPressure, maxPressure);
-                    emit statsUpdated("Voltage", totalVoltage/voltageCount, minVoltage, maxVoltage);
-
-                    emit updateCharts("update", localDataList);
-                    localDataList.clear();
-
-                    localProgress = 0;
+                {
+                    std::lock_guard<std::mutex> lock(activeTaskMutex);
+                    --activeTask;
+                    qDebug() << "Active tasks remaining:" << activeTask;
                 }
 
+                if (activeTask == 0) {
+                    isProcessing = false;
 
+                    qint64 tempTime =  QDateTime::currentMSecsSinceEpoch();
+                    processObjectTime = tempTime - startProcObjTime;
+                    emit updateProcessTime(generateObjectTime, processObjectTime);
+                    emit statusChanged("Processing complete.");
+                    emit updateCharts("update");
+
+
+
+                    static bool poolCleaned = false;
+
+                    if (pool && !poolCleaned) {
+                        poolCleaned = true;
+                        QMetaObject::invokeMethod(this, [this]() {
+                            delete pool;
+                            pool = nullptr;
+                            qDebug() << "ThreadPool Deconstructor called!!";
+                        }, Qt::QueuedConnection);
+                    }
+
+                }
+
+            } catch (const std::exception &e) {
+                qCritical() << "Error in processing data chunk:" << e.what();
             }
-        }));
 
+        });
     }
-
-    for (auto& thread : threads) {
-        if (thread.joinable()) {
-            thread.join();
-        }
-    }
-
 
 }
 
@@ -157,6 +210,7 @@ void SensorDataProcessor::generateSensors(int numDataPoints){
 
     emit statusChanged("(Single Thread) Generating Data Objects...");
 
+    startGenObjTime = QDateTime::currentMSecsSinceEpoch();
 
     for(int i = 0; i < numDataPoints; ++i){
 
@@ -197,4 +251,7 @@ void SensorDataProcessor::generateSensors(int numDataPoints){
     }
 
      emit progressUpdated("Generating Data Objects...",numDataPoints, numDataPoints);
+     qint64 tempEndTime = QDateTime::currentMSecsSinceEpoch();
+     generateObjectTime = tempEndTime - startGenObjTime;
+
 }

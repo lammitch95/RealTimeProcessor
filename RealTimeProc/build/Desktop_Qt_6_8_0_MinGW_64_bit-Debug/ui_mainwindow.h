@@ -16,7 +16,6 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableWidget>
@@ -44,9 +43,10 @@ public:
     QVBoxLayout *verticalLayout_3;
     QLabel *LBLProcess;
     QLabel *LblStatus;
-    QFrame *frame_6;
+    QFrame *ProcessLabels;
     QVBoxLayout *verticalLayout_5;
-    QListView *SensorsView;
+    QLabel *LblSingleThread;
+    QLabel *LblMultiThread;
     QFrame *frame_5;
     QVBoxLayout *verticalLayout_4;
     QTableWidget *SensorTable;
@@ -67,6 +67,7 @@ public:
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(MainWindow->sizePolicy().hasHeightForWidth());
         MainWindow->setSizePolicy(sizePolicy);
+        MainWindow->setStyleSheet(QString::fromUtf8("background-color:  rgb(0, 80, 161);"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         sizePolicy.setHeightForWidth(centralwidget->sizePolicy().hasHeightForWidth());
@@ -155,14 +156,17 @@ public:
         verticalLayout_3->setObjectName("verticalLayout_3");
         LBLProcess = new QLabel(frame_4);
         LBLProcess->setObjectName("LBLProcess");
-        LBLProcess->setFont(font);
+        QFont font1;
+        font1.setPointSize(12);
+        font1.setBold(true);
+        LBLProcess->setFont(font1);
         LBLProcess->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
 
         verticalLayout_3->addWidget(LBLProcess);
 
         LblStatus = new QLabel(frame_4);
         LblStatus->setObjectName("LblStatus");
-        LblStatus->setFont(font);
+        LblStatus->setFont(font1);
         LblStatus->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
 
         verticalLayout_3->addWidget(LblStatus);
@@ -170,24 +174,36 @@ public:
 
         verticalLayout->addWidget(frame_4);
 
-        frame_6 = new QFrame(frame);
-        frame_6->setObjectName("frame_6");
-        frame_6->setFrameShape(QFrame::Shape::StyledPanel);
-        frame_6->setFrameShadow(QFrame::Shadow::Raised);
-        verticalLayout_5 = new QVBoxLayout(frame_6);
+        ProcessLabels = new QFrame(frame);
+        ProcessLabels->setObjectName("ProcessLabels");
+        ProcessLabels->setFrameShape(QFrame::Shape::StyledPanel);
+        ProcessLabels->setFrameShadow(QFrame::Shadow::Raised);
+        verticalLayout_5 = new QVBoxLayout(ProcessLabels);
         verticalLayout_5->setObjectName("verticalLayout_5");
-        SensorsView = new QListView(frame_6);
-        SensorsView->setObjectName("SensorsView");
+        LblSingleThread = new QLabel(ProcessLabels);
+        LblSingleThread->setObjectName("LblSingleThread");
+        LblSingleThread->setFont(font1);
+        LblSingleThread->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+        LblSingleThread->setWordWrap(true);
 
-        verticalLayout_5->addWidget(SensorsView);
+        verticalLayout_5->addWidget(LblSingleThread);
+
+        LblMultiThread = new QLabel(ProcessLabels);
+        LblMultiThread->setObjectName("LblMultiThread");
+        LblMultiThread->setFont(font1);
+        LblMultiThread->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
+        LblMultiThread->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+        LblMultiThread->setWordWrap(true);
+
+        verticalLayout_5->addWidget(LblMultiThread);
 
 
-        verticalLayout->addWidget(frame_6);
+        verticalLayout->addWidget(ProcessLabels);
 
         verticalLayout->setStretch(0, 1);
         verticalLayout->setStretch(1, 1);
-        verticalLayout->setStretch(2, 1);
-        verticalLayout->setStretch(3, 5);
+        verticalLayout->setStretch(2, 2);
+        verticalLayout->setStretch(3, 2);
 
         horizontalLayout_2->addWidget(frame);
 
@@ -217,14 +233,35 @@ public:
         QTableWidgetItem *__qtablewidgetitem5 = new QTableWidgetItem();
         SensorTable->setVerticalHeaderItem(2, __qtablewidgetitem5);
         SensorTable->setObjectName("SensorTable");
-        sizePolicy.setHeightForWidth(SensorTable->sizePolicy().hasHeightForWidth());
-        SensorTable->setSizePolicy(sizePolicy);
-        QFont font1;
-        font1.setBold(true);
-        font1.setItalic(false);
-        font1.setUnderline(false);
-        font1.setStrikeOut(false);
-        SensorTable->setFont(font1);
+        QSizePolicy sizePolicy1(QSizePolicy::Policy::MinimumExpanding, QSizePolicy::Policy::MinimumExpanding);
+        sizePolicy1.setHorizontalStretch(1);
+        sizePolicy1.setVerticalStretch(1);
+        sizePolicy1.setHeightForWidth(SensorTable->sizePolicy().hasHeightForWidth());
+        SensorTable->setSizePolicy(sizePolicy1);
+        SensorTable->setMinimumSize(QSize(0, 0));
+        QFont font2;
+        font2.setBold(false);
+        font2.setItalic(false);
+        font2.setUnderline(false);
+        font2.setStrikeOut(false);
+        SensorTable->setFont(font2);
+        SensorTable->setStyleSheet(QString::fromUtf8("QTableView {\n"
+"    color: white;\n"
+"    gridline-color:  rgb(71, 153, 176);;\n"
+"    border-color: rgb(71, 153, 176);\n"
+"    font: 10px;\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(71, 153, 176);\n"
+"    color: white;\n"
+"  \n"
+"}\n"
+"QTableView::item:focus{\n"
+"    border: 2px solid rgb(71, 153, 176);\n"
+"    background-color: rgb(255, 254, 229);\n"
+"}\n"
+"\n"
+""));
         SensorTable->setLineWidth(0);
         SensorTable->setMidLineWidth(0);
         SensorTable->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
@@ -232,10 +269,14 @@ public:
         SensorTable->setSizeAdjustPolicy(QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents);
         SensorTable->setAutoScroll(true);
         SensorTable->setAutoScrollMargin(0);
+        SensorTable->setShowGrid(true);
         SensorTable->setGridStyle(Qt::PenStyle::SolidLine);
         SensorTable->setSortingEnabled(false);
+        SensorTable->setWordWrap(true);
+        SensorTable->setCornerButtonEnabled(true);
         SensorTable->horizontalHeader()->setVisible(true);
-        SensorTable->horizontalHeader()->setCascadingSectionResizes(false);
+        SensorTable->horizontalHeader()->setCascadingSectionResizes(true);
+        SensorTable->horizontalHeader()->setMinimumSectionSize(28);
         SensorTable->horizontalHeader()->setProperty("showSortIndicator", QVariant(false));
         SensorTable->horizontalHeader()->setStretchLastSection(true);
         SensorTable->verticalHeader()->setCascadingSectionResizes(false);
@@ -255,16 +296,31 @@ public:
         chartNav->setObjectName("chartNav");
         BtnTempChart = new QPushButton(frame_5);
         BtnTempChart->setObjectName("BtnTempChart");
+        BtnTempChart->setFont(font);
+        BtnTempChart->setStyleSheet(QString::fromUtf8("background-color:  rgb(0, 181, 222);\n"
+"color: white;\n"
+"border-radius: 5px;\n"
+"padding: 10px;"));
 
         chartNav->addWidget(BtnTempChart);
 
         BtnPressChart = new QPushButton(frame_5);
         BtnPressChart->setObjectName("BtnPressChart");
+        BtnPressChart->setFont(font);
+        BtnPressChart->setStyleSheet(QString::fromUtf8("background-color:  rgb(0, 181, 222);\n"
+"color: white;\n"
+"border-radius: 5px;\n"
+"padding: 10px;"));
 
         chartNav->addWidget(BtnPressChart);
 
         BtnVoltageChart = new QPushButton(frame_5);
         BtnVoltageChart->setObjectName("BtnVoltageChart");
+        BtnVoltageChart->setFont(font);
+        BtnVoltageChart->setStyleSheet(QString::fromUtf8("background-color:  rgb(0, 181, 222);\n"
+"color: white;\n"
+"border-radius: 5px;\n"
+"padding: 10px;"));
 
         chartNav->addWidget(BtnVoltageChart);
 
@@ -299,6 +355,8 @@ public:
         SensorAmountTxt->setText(QString());
         LBLProcess->setText(QCoreApplication::translate("MainWindow", "NA: (0/0)", nullptr));
         LblStatus->setText(QCoreApplication::translate("MainWindow", "Status: Active", nullptr));
+        LblSingleThread->setText(QCoreApplication::translate("MainWindow", "Generate Sensors: 1000ms", nullptr));
+        LblMultiThread->setText(QCoreApplication::translate("MainWindow", "Processing Sensor Data: 5ms", nullptr));
         QTableWidgetItem *___qtablewidgetitem = SensorTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QCoreApplication::translate("MainWindow", "Avg", nullptr));
         QTableWidgetItem *___qtablewidgetitem1 = SensorTable->horizontalHeaderItem(1);
