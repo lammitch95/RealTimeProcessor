@@ -14,6 +14,9 @@ it visualizes the processing times of each object using scatter charts, displayi
 * Periodically update progress and emit signals for UI responsiveness.
 * Wait for all threads to finish using join() to ensure the main program flow doesn’t continue prematurely.
 
+### Demo
+![DemoGifRealTimeProc](https://github.com/user-attachments/assets/8753ac13-f929-4752-9b39-ed3cc87dc68d) 
+
 ### Key Features
 
 * Utilizes Qt's threading capabilities to process large datasets in parallel, reducing processing time.
