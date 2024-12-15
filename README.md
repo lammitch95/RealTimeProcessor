@@ -21,6 +21,7 @@ it visualizes the processing times of each object using scatter charts, displayi
 ##### The following GIF demonstrates the workflow of the application, including:
 1. Single-threaded object generation: The creation of 700k+ sensor objects.
 2. Multithreaded data processing: The calculation of statistical data and visualization of processing times.
+   
 Notice the significant reduction in processing time when switching to multithreading for data processing tasks
 
 ### Key Features
